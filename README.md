@@ -1,56 +1,64 @@
-# Welcome to your Expo app 👋
+# Mood Buddy v2
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A rewrite of Mood Buddy, a private mood journal for iPhone and Android phones. You log mood,
+stress and anxiety; the data stays on the device in SQLite.
 
-## Get started
+**Status:** foundation only. The app shell (navigation, theme, storage, database schema and
+startup) is built; the screens are placeholders. Feature work follows [docs/SPEC.md](docs/SPEC.md).
 
-1. Install dependencies
+## Requirements
 
-   ```bash
-   npm install
-   ```
+- Node.js 22.13 or later (tests use the built-in `node:sqlite`)
+- Yarn 1 (the repo uses `yarn.lock`)
+- A **development build** on a simulator, emulator or device. Expo Go is not supported, because
+  the app uses native modules Expo Go doesn't include (MMKV / Nitro).
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Getting started
 
 ```bash
-npm run reset-project
+yarn                       # install dependencies
+npx expo run:ios           # or: npx expo run:android — builds and installs a development build
+npx expo start             # start the dev server for an installed development build
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Cloud development builds: `npx eas-cli@latest build --profile development` (profiles in `eas.json`).
 
-### Other setup steps
+Add dependencies only with `npx expo install <package>`.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Scripts
 
-## Learn more
+| Script | What it does |
+|---|---|
+| `yarn lint` | ESLint (`expo lint`) |
+| `yarn typecheck` | `tsc --noEmit` |
+| `yarn test` | Jest |
+| `yarn test:coverage` | Jest with coverage thresholds |
+| `yarn test:tz` | The whole suite in `Asia/Kolkata` and `America/Los_Angeles` |
+| `yarn run check` | lint + typecheck + coverage + time-zone runs (the done-gate). Use `run`: bare `yarn check` is Yarn's built-in lockfile check. |
 
-To learn more about developing your project with Expo, look at the following resources:
+## Docs
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md): getting started, done-gate and how decisions are recorded
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): folder map, startup sequence, state placement, adding a screen
+- [docs/adr/](docs/adr/README.md): architecture decision records
+- [docs/SPEC.md](docs/SPEC.md): product spec and decisions (D1 to D50)
+- [CHANGELOG.md](CHANGELOG.md): release notes
+- [CLAUDE.md](CLAUDE.md): project conventions
+- [AGENTS.md](AGENTS.md): Expo version rules and commands
 
-## Join the community
+## Privacy
 
-Join our community of developers creating universal apps.
+There are no accounts, no analytics and no backend. Your data stays on the device.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **No backups.** The app's data is excluded from OS backups on both platforms. On Android, app
+  backup is turned off. On iOS, the app marks its data folders as excluded from iCloud and computer
+  backups each time it starts. The API key is stored in the device's secure storage and never moves
+  to another device.
+- **What that means for you:** your entries are lost if you change phones, restore a phone from a
+  backup, or delete and reinstall the app. Use **Export my data** (CSV of your entries) to keep a
+  copy, and **Delete all my data** to erase everything. Both are planned features (SPEC D14, D30).
+- **Network:** today the app makes no network calls of its own. Planned (not built yet): an
+  optional AI chat that calls the Anthropic API with a key you supply, and a daily quote from
+  ZenQuotes. Once those ship, they will be the only network calls.
+
+Details: [ADR 006](docs/adr/006-no-backup.md).
