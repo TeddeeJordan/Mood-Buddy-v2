@@ -9,6 +9,12 @@ export interface ScreenHeaderProps {
   variant?: 'menu' | 'back';
 }
 
+/**
+ * The Appbar has a fixed height (64), so an unbounded title clips at the largest accessibility
+ * text sizes. 1.5 keeps titleLarge (22/28) at most 33/42, inside the bar.
+ */
+export const HEADER_TITLE_MAX_FONT_SCALE = 1.5;
+
 export const makeStyles = (theme: AppTheme) =>
   StyleSheet.create({
     header: { backgroundColor: theme.colors.background },

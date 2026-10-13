@@ -2,7 +2,7 @@ import { Appbar } from 'react-native-paper';
 
 import { useAppTheme } from '@/themes/useAppTheme';
 
-import { makeStyles, type ScreenHeaderProps } from './ScreenHeader.props';
+import { HEADER_TITLE_MAX_FONT_SCALE, makeStyles, type ScreenHeaderProps } from './ScreenHeader.props';
 import { useScreenHeader } from './useScreenHeader';
 
 export function ScreenHeader({ title, variant = 'menu' }: ScreenHeaderProps) {
@@ -21,7 +21,7 @@ export function ScreenHeader({ title, variant = 'menu' }: ScreenHeaderProps) {
           style={styles.action}
         />
       )}
-      <Appbar.Content title={title} />
+      <Appbar.Content title={title} titleMaxFontSizeMultiplier={HEADER_TITLE_MAX_FONT_SCALE} />
     </Appbar.Header>
   );
 }

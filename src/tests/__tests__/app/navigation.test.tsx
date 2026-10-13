@@ -6,6 +6,8 @@ import { secureStoreMock } from '@/tests/helpers/secureStoreMock';
 // The real route tree (src/app) with real providers, except SQLite (native) and the splash.
 jest.mock('expo-sqlite', () => ({
   SQLiteProvider: ({ children }: { children: React.ReactNode }) => children,
+  // Home builds its repository from the connection; navigation tests never touch the database.
+  useSQLiteContext: () => ({}),
 }));
 jest.mock('expo-splash-screen', () => ({
   hide: jest.fn(),
@@ -50,23 +52,14 @@ function tabButtons() {
 }
 
 /**
- * The tab bar renders both icon variants and cross-fades them by opacity, so the icon a sighted
- * user sees is the one whose wrapper has opacity 1.
+ * The tab bar renders each icon twice (focused true/false) and cross-fades by opacity, but only the
+ * visible layer renders an icon, so exactly one variant exists per tab.
  */
 function shownIconVariant(tab: 'home' | 'dashboard'): 'filled' | 'outline' {
-  const opacityOf = (testID: string) => {
-    let node: ReturnType<typeof screen.getByTestId> | null = screen.getByTestId(testID);
-    while (node) {
-      const style = Object.assign({}, ...[node.props.style].flat(Infinity).filter(Boolean));
-      if (typeof style.opacity === 'number') return style.opacity as number;
-      node = node.parent;
-    }
-    return 1;
-  };
-  const filled = opacityOf(`tab-icon-${tab}-filled`);
-  const outline = opacityOf(`tab-icon-${tab}-outline`);
-  expect(filled + outline).toBe(1);
-  return filled === 1 ? 'filled' : 'outline';
+  const filled = screen.queryByTestId(`tab-icon-${tab}-filled`);
+  const outline = screen.queryByTestId(`tab-icon-${tab}-outline`);
+  expect([filled, outline].filter(Boolean)).toHaveLength(1);
+  return filled ? 'filled' : 'outline';
 }
 
 function visibleTabNames() {

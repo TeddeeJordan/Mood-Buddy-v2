@@ -4,6 +4,7 @@ module.exports = {
   roots: ['<rootDir>/src'],
   testMatch: ['<rootDir>/src/tests/__tests__/**/*.test.{ts,tsx}'],
   setupFiles: ['<rootDir>/src/tests/setup.ts'],
+  testTimeout: 15000,
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-native-paper|react-native-mmkv|react-native-nitro-modules|@tanstack|@reduxjs|immer|reselect|redux|react-redux|standard-navigation))',
   ],

@@ -11,6 +11,9 @@ Short records of significant decisions. The full product decisions (D1–D50) li
 | [005](005-theme-contrast-option-c.md) | Theme contrast: identity colours as containers, deeper shades for text | Accepted | D6, §5.6 |
 | [006](006-no-backup.md) | App data is excluded from OS backups (Android `allowBackup=false`; iOS local module flags the data directories) | Accepted | D49 |
 | [007](007-dependency-audit-exceptions.md) | Known `yarn audit` exceptions (all under `expo`, no patch available) | Accepted | - |
+| [008](008-repositories-over-structural-db-type.md) | Repositories are factories over a structural `SqlDatabase` type | Accepted | §2.7, §3.7, D3, D20 |
+| [009](009-env-files-policy.md) | Only `.env.example` is committed; `.env` is git-ignored; EAS uses EAS environment variables | Accepted | - |
+| [010](010-font-scale-caps.md) | Font-scale caps on emoji tiles and the screen header (accepted WCAG 1.4.4 exception) | Accepted | D48 |
 
 ## Writing a new ADR
 

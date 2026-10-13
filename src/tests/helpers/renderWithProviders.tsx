@@ -19,6 +19,12 @@ export const TEST_SAFE_AREA_METRICS = {
 export function makeProviders(preloaded: RootState = { settings: initialSettingsState }) {
   const store = makeStore(preloaded);
   const queryClient = createQueryClient();
+  // A finished mutation keeps a 5-minute gc timer that keeps the Jest worker alive; gcTime 0
+  // drops it right away.
+  queryClient.setDefaultOptions({
+    ...queryClient.getDefaultOptions(),
+    mutations: { ...queryClient.getDefaultOptions().mutations, gcTime: 0 },
+  });
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <SafeAreaProvider initialMetrics={TEST_SAFE_AREA_METRICS}>

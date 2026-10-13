@@ -53,7 +53,7 @@ export const STRESS_SCALE: Scale = {
     { value: 2, label: 'Chill', emoji: '😌', direction: 'low stress' },
     { value: 3, label: 'Okay', emoji: '😐', direction: 'some stress' },
     { value: 4, label: 'Stressed', emoji: '😤', direction: 'high stress' },
-    { value: 5, label: 'Overwhelmed', emoji: '😱', direction: 'most stress' },
+    { value: 5, label: 'Crushed', emoji: '😱', direction: 'most stress' },
   ],
   displayDirection: 'descending',
   endLabels: ['Most stress', 'Least stress'],

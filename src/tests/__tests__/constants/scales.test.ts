@@ -21,7 +21,7 @@ describe('scale constants (D39 value meaning)', () => {
 
   it('maps values to labels per SPEC §3.1', () => {
     expect(MOOD_SCALE.options.map((o) => o.label)).toEqual(['Upset', 'Unhappy', 'Neutral', 'Content', 'Happy']);
-    expect(STRESS_SCALE.options.map((o) => o.label)).toEqual(['Stressfree', 'Chill', 'Okay', 'Stressed', 'Overwhelmed']);
+    expect(STRESS_SCALE.options.map((o) => o.label)).toEqual(['Stressfree', 'Chill', 'Okay', 'Stressed', 'Crushed']);
     expect(ANXIETY_SCALE.options.map((o) => o.label)).toEqual(['Calm', 'Relaxed', 'Neutral', 'Anxious', 'Panicked']);
     expect(STRESS_SCALE.options[4].emoji).toBe('😱');
     expect(ANXIETY_SCALE.options[0].emoji).toBe('😌');
@@ -46,7 +46,7 @@ describe('display order (D48)', () => {
 
   it('puts the worst state on the left in every row', () => {
     expect(displayOptions(MOOD_SCALE)[0].label).toBe('Upset');
-    expect(displayOptions(STRESS_SCALE)[0].label).toBe('Overwhelmed');
+    expect(displayOptions(STRESS_SCALE)[0].label).toBe('Crushed');
     expect(displayOptions(ANXIETY_SCALE)[0].label).toBe('Panicked');
     expect(MOOD_SCALE.endLabels).toEqual(['Worst', 'Best']);
     expect(STRESS_SCALE.endLabels).toEqual(['Most stress', 'Least stress']);
@@ -114,7 +114,7 @@ describe('accessibility labels (word-only ladder)', () => {
   });
 
   it('matches the spec examples', () => {
-    expect(tileAccessibilityLabel(STRESS_SCALE.options[4])).toBe('Overwhelmed, most stress');
+    expect(tileAccessibilityLabel(STRESS_SCALE.options[4])).toBe('Crushed, most stress');
     expect(tileAccessibilityLabel(STRESS_SCALE.options[2])).toBe('Okay, some stress');
     expect(tileAccessibilityLabel(MOOD_SCALE.options[4])).toBe('Happy, best mood');
   });

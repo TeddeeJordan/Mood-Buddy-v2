@@ -46,7 +46,8 @@
           "faceIDPermission": false,
           "configureAndroidBackup": true
         }
-      ]
+      ],
+      "./plugins/withAndroidFontScaleConfigChange"
     ],
     "experiments": {
       "typedRoutes": true,

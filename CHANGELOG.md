@@ -4,16 +4,18 @@ All notable changes to Mood Buddy v2 are recorded here. The format follows [Keep
 
 ## [Unreleased]
 
-The "Foundation" milestone: the app shell and infrastructure. There are no feature screens yet; Home, Dashboard, Diary, Profile, Settings and Chat are placeholders.
+The "Foundation" milestone (the app shell and infrastructure) plus the first slice of Home. Dashboard, Diary, Profile, Settings and Chat are still placeholders.
 
 ### Added
+
+- **Mood check-in (Home):** pick how you feel, your stress level and your anxiety level, then tap Submit. If stress or anxiety is high, you can add up to three short notes (50 characters each) about what is causing it. If you skip a row, "Please choose one." appears under it and screen readers announce what is missing. After saving you see "Saved! Your mood has been recorded." Each check-in also creates a diary prompt, and diary prompts older than 90 days are removed. Screen readers read each choice as a word, not a number. The top stress choice (the leftmost stress tile) is labelled "Crushed". On iOS, VoiceOver reads "Saved! Your mood has been recorded." without it being cut off by other announcements. On Android, changing the system Font size keeps your unsaved check-in (choices, notes and counter) and re-sizes the text; changing Display size still restarts the screen and loses an unsaved draft. AI chat after a check-in is not available yet.
 
 - **App identity:** new app "Mood Buddy" (slug `mood-buddy-2`), bundle identifier and Android package `com.teddeej.moodbuddy2`, URL scheme `moodbuddy2`. Phones only, portrait, light theme. This is a separate install from the original Mood Buddy.
 - **Tooling:** ESLint, TypeScript strict type-checking and Jest with Testing Library. Coverage thresholds are 65% lines, statements and functions, and 50% branches. `yarn test:tz` runs the suite in two time zones, and `yarn run check` runs everything as the done-gate. Development builds are required (Expo Go is not supported); EAS profiles `development`, `development-simulator`, `preview` and `production`.
 - **Navigation shell:** a drawer (Diary, Profile, Settings) around two visible tabs (Home, Dashboard). Diary, Profile and Settings are hidden tabs, so the tab bar stays visible. Chat opens above the drawer as its own screen. Tab presses give haptic feedback on iOS.
 - **Theme:** React Native Paper light themes in three palettes (lavender default, sage, water), with the owner's colours used as containers and deeper shades of the same hue for text and thin UI (contrast option C). A test checks the contrast of every colour token.
 - **Data layer:**
-  - On-device SQLite database with versioned migrations (schema v1: mood entries, diary prompts, profile), foreign keys on for every connection and cascade delete of a diary prompt with its entry. Repository interfaces are defined but not implemented yet.
+  - On-device SQLite database with versioned migrations (schema v1: mood entries, diary prompts, profile), foreign keys on for every connection and cascade delete of a diary prompt with its entry. Entry and prompt storage is implemented for the Home check-in; the profile repository is still an interface only.
   - Settings stored with MMKV (theme, reminder, AI toggle and related flags), kept in Redux and saved automatically.
   - API key storage wrapper over the device's secure storage (`expo-secure-store`); the key is never held in Redux or MMKV, and first-install cleanup runs at startup.
   - Redux Toolkit store and a TanStack Query client with a central set of query keys; refetch-on-focus follows the app's foreground state.
@@ -21,9 +23,10 @@ The "Foundation" milestone: the app shell and infrastructure. There are no featu
 - **Scales:** mood, stress and anxiety scale definitions (stored 1 to 5, with stress and anxiety displayed 5 to 1) and the note rule for stored values of 4 or more.
 - **Startup:** the splash screen stays up until the database, settings and key check are ready; a root error boundary shows startup errors instead of a stuck splash. If the key check has not finished after 4 seconds, the app opens anyway (treating the key as not set) so the splash can never hang; a late result still updates it.
 - **Accessibility:**
+  - Screen readers find exactly one icon per tab (no hidden duplicate).
   - Tab labels count visible tabs only ("Home, tab, 1 of 2" on iOS; "Home, 1 of 2" on Android).
   - Selected tabs and drawer items no longer rely on colour alone: they use a filled icon, and the active drawer item gets a border.
-  - A helper builds word-only labels for scale tiles (for example "Stressed, high stress"); the tiles themselves are not built yet.
+  - A helper builds word-only labels for scale tiles (for example "Stressed, high stress"); the tiles are now used on Home.
   - Header and drawer icon buttons have larger touch targets, so they are easier to tap.
 - **Documentation:** architecture map, architecture decision records and contributing guide in `docs/`.
 
