@@ -10,6 +10,16 @@ npx expo run:ios          # or: npx expo run:android (builds and installs a deve
 npx expo start            # dev server for an installed development build
 ```
 
+When the Axios feature lands, also copy the example env file (no env vars exist yet, so there is no `.env.example` today):
+
+```bash
+cp .env.example .env
+```
+
+`.env` is git-ignored; only `.env.example` is committed. Values are public `EXPO_PUBLIC_*` only (never secrets) and are read once in `src/constants/env.ts`. EAS builds use EAS environment variables instead of a committed `.env` ([ADR 009](adr/009-env-files-policy.md)).
+
+Local config plugins live in `plugins/` (registered in `app.json`). Changing a plugin or native config in `app.json` needs a rebuild: `npx expo prebuild --clean -p android` then `npx expo run:android` (or `-p ios` / `run:ios`), or a new EAS development build.
+
 Cloud builds use EAS profiles from `eas.json`: `npx eas-cli@latest build --profile development`.
 
 Add dependencies only with `npx expo install <package>` (never npm, pnpm or bun lockfiles).

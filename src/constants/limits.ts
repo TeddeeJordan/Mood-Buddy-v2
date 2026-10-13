@@ -1,7 +1,6 @@
 /** Notes appear (and are saved) when a stress/anxiety stored value is at or above this (D4, D39). */
 export const NOTE_THRESHOLD = 4;
 export const NOTE_MAX_LENGTH = 50;
-export const NOTES_PER_SECTION = 3;
 
 export const BIO_LIMIT = 1000;
 /** Diary prompts older than this are purged (D3). */

@@ -30,8 +30,12 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files (only .env.example is committed; EAS builds use EAS env vars)
+.env*
+!.env.example
+
+# Claude Code per-machine settings (shared settings live in .claude/settings.json)
+.claude/settings.local.json
 
 # typescript
 *.tsbuildinfo

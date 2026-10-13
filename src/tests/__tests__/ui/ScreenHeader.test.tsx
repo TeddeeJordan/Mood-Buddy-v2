@@ -32,6 +32,11 @@ describe('ScreenHeader', () => {
     expect(screen.queryByLabelText('Go back')).toBeNull();
   });
 
+  it('caps the title font scaling at 1.5', async () => {
+    await renderWithProviders(<ScreenHeader title="Home" />);
+    expect(screen.getByText('Home').props.maxFontSizeMultiplier).toBe(1.5);
+  });
+
   it('opens the drawer when the menu button is pressed', async () => {
     await renderWithProviders(<ScreenHeader title="Home" />);
     await fireEvent.press(screen.getByLabelText('Open menu'));
