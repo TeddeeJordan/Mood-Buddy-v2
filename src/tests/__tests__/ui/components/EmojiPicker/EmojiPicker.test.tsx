@@ -2,6 +2,7 @@ import { screen, userEvent } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 
 import { ANXIETY_SCALE, MOOD_SCALE, STRESS_SCALE, type Scale } from '@/constants/scales';
+import { UNCAPPED_FONT_SCALE } from '@/constants/textScaling';
 import { MIN_TOUCH_TARGET } from '@/constants/touchTarget';
 import { renderWithProviders } from '@/tests/helpers/renderWithProviders';
 import { EmojiPicker } from '@/ui/components/EmojiPicker/EmojiPicker';
@@ -90,6 +91,11 @@ describe('EmojiPicker', () => {
     expect(screen.queryByText('Please choose one.')).toBeNull();
     await rerender(<EmojiPicker scale={MOOD_SCALE} value={null} onChange={jest.fn()} errorText="Please choose one." />);
     expect(screen.getByText('Please choose one.')).toBeTruthy();
+  });
+
+  it('does not cap the error text size (WCAG 1.4.4)', async () => {
+    await renderWithProviders(<EmojiPicker scale={MOOD_SCALE} value={null} onChange={jest.fn()} errorText="Please choose one." />);
+    expect(screen.getByText('Please choose one.').props.maxFontSizeMultiplier).toBe(UNCAPPED_FONT_SCALE);
   });
 
   it('keeps every tile at least the minimum touch target', async () => {

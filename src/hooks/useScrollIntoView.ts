@@ -61,6 +61,11 @@ export function useScrollIntoView() {
       focusedField.current = field;
       revealFocusedField();
     },
+    /**
+     * Re-reveals the focused field, if any. Call from the field container's `onLayout` when it can
+     * grow while focused (e.g. a multiline input, or a message appearing under it).
+     */
+    revealFocusedField,
     forgetField: (field: View | null) => {
       if (focusedField.current === field) focusedField.current = null;
     },

@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { HelperText, Text } from 'react-native-paper';
 
 import { displayOptions } from '@/constants/scales';
+import { UNCAPPED_FONT_SCALE } from '@/constants/textScaling';
 import { useAppTheme } from '@/themes/useAppTheme';
 import { EmojiTile } from '@/ui/widgets/EmojiTile/EmojiTile';
 
@@ -44,7 +45,7 @@ export function EmojiPicker({ scale, value, onChange, errorText }: EmojiPickerPr
         </Text>
       </View>
       {errorText ? (
-        <HelperText type="error" visible>
+        <HelperText type="error" visible maxFontSizeMultiplier={UNCAPPED_FONT_SCALE}>
           {errorText}
         </HelperText>
       ) : null}

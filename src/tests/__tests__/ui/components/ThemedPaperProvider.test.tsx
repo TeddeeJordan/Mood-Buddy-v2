@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { act, render, screen } from '@testing-library/react-native';
+import { Dimensions, Text } from 'react-native';
 import { Provider as ReduxProvider } from 'react-redux';
 
 import { initialSettingsState } from '@/state/settingsSlice';
@@ -36,5 +36,32 @@ describe('ThemedPaperProvider', () => {
     await renderWithTheme(name);
     expect(screen.getByText(buildPaperTheme(name).colors.primaryContainer)).toBeTruthy();
     expect(buildPaperTheme(name).colors.primaryContainer).not.toBe(buildPaperTheme('lavender').colors.primaryContainer);
+  });
+});
+
+describe('ThemedPaperProvider live font scale', () => {
+  // Wired by usePaperTheme: a font-scale change flips the theme's re-layout marker.
+  function FontProbe() {
+    const theme = useAppTheme();
+    return <Text>{`style:${String((theme.fonts.default as { fontStyle?: string }).fontStyle)}`}</Text>;
+  }
+
+  it('adds the re-layout fontStyle after a font-scale change without remounting', async () => {
+    const store = makeStore({ settings: initialSettingsState });
+    await render(
+      <ReduxProvider store={store}>
+        <ThemedPaperProvider>
+          <FontProbe />
+        </ThemedPaperProvider>
+      </ReduxProvider>,
+    );
+    expect(screen.getByText('style:undefined')).toBeTruthy();
+    await act(async () => {
+      Dimensions.set({ window: { ...Dimensions.get('window'), fontScale: 1.8 }, screen: { ...Dimensions.get('screen'), fontScale: 1.8 } });
+    });
+    expect(screen.getByText('style:normal')).toBeTruthy();
+    await act(async () => {
+      Dimensions.set({ window: { ...Dimensions.get('window'), fontScale: 1 }, screen: { ...Dimensions.get('screen'), fontScale: 1 } });
+    });
   });
 });

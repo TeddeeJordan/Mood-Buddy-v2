@@ -1,6 +1,8 @@
 import { Tabs } from 'expo-router/js-tabs';
 import { Platform } from 'react-native';
 
+import { useTabLeaveGuardListeners } from '@/hooks/useLeaveGuard';
+import { textRelayoutStyle } from '@/themes/paperTheme';
 import { useAppTheme } from '@/themes/useAppTheme';
 import { HapticTabButton } from '@/ui/widgets/HapticTabButton/HapticTabButton';
 import { TabBarIcon } from '@/ui/widgets/TabBarIcon/TabBarIcon';
@@ -15,11 +17,16 @@ const VISIBLE_TAB_COUNT = 2;
  * (TabsClient.js:15 ignores `href` when options is a function). HapticTabButton is set only here.
  * The selected tab shows a filled icon and the others an outline icon, so state isn't colour-only
  * (WCAG 1.4.1). TabBarIcon renders only the visible one of the tab bar's two icon layers.
+ * `screenListeners` asks the focused screen's leave guard before a tab press switches tabs.
+ * `tabBarLabelStyle` re-measures the labels after a live text-size change (`textRelayoutStyle`).
  */
 export default function TabsLayout() {
-  const { colors } = useAppTheme();
+  const theme = useAppTheme();
+  const { colors } = theme;
+  const screenListeners = useTabLeaveGuardListeners();
   return (
     <Tabs
+      screenListeners={screenListeners}
       screenOptions={{
         headerShown: false,
         tabBarButton: HapticTabButton,
@@ -27,6 +34,8 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle: { backgroundColor: colors.surface },
+        // Tab labels aren't Paper text: this carries the theme's live font-scale re-layout marker.
+        tabBarLabelStyle: textRelayoutStyle(theme),
       }}>
       <Tabs.Screen
         name="index"

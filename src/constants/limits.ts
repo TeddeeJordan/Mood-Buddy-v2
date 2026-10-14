@@ -17,3 +17,10 @@ export const REMINDER_DEFAULT = { hour: 18, minute: 0 } as const;
  * so a keychain call that never settles cannot keep the splash up forever.
  */
 export const BOOTSTRAP_TIMEOUT_MS = 4000;
+
+/**
+ * Profile: after a successful save, Edit presses are ignored for this long. Edit takes Save's place
+ * in the header, so the second tap of a double tap on Save would otherwise reopen edit mode.
+ * Short, so Edit stays usable right away for a deliberate press.
+ */
+export const EDIT_AFTER_SAVE_GUARD_MS = 1000;

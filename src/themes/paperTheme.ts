@@ -56,3 +56,27 @@ export function buildPaperTheme(name: ThemeName): AppTheme {
     },
   };
 }
+
+/**
+ * Live font-scale re-layout (see `useFontScaleRelayoutPass`). On odd passes every Paper font gets
+ * `fontStyle: 'normal'` (the default, so nothing looks different); on even passes the base theme is
+ * used. Flipping it changes a prop on every Paper text node (Text, Button and Drawer labels,
+ * HelperText, TextInput and its label, Appbar, Dialog, Snackbar), so React clones them with new
+ * props and they re-measure at the current scale, without remounting anything. Explicit styles
+ * come after the theme font in Paper's style arrays, so e.g. an italic placeholder stays italic.
+ */
+export function withTextRelayoutPass(theme: AppTheme, pass: number): AppTheme {
+  if (pass % 2 === 0) return theme;
+  const fonts = Object.fromEntries(
+    Object.entries(theme.fonts).map(([key, font]) => [key, { ...font, fontStyle: 'normal' }]),
+  ) as AppTheme['fonts'];
+  return { ...theme, fonts };
+}
+
+/**
+ * The same re-layout marker for text Paper doesn't render (the JS tab bar labels): pass it as that
+ * text's style. `fontStyle` is undefined on even passes, `'normal'` on odd ones.
+ */
+export function textRelayoutStyle(theme: AppTheme): { fontStyle: AppTheme['fonts']['default']['fontStyle'] } {
+  return { fontStyle: theme.fonts.default.fontStyle };
+}

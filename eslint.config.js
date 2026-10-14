@@ -15,7 +15,7 @@ const jestGlobals = {
 };
 
 /**
- * Machine-checked conventions (CLAUDE.md → Navigation, Storage and security).
+ * Machine-checked conventions (CLAUDE.md → Navigation, Storage and security, Text scaling).
  * Flat config replaces a rule's options wholesale, so the override for the Anthropic service and
  * tests re-lists the navigation restrictions without the `readApiKey` one.
  */
@@ -47,6 +47,36 @@ const noNativeTabsSyntax = [
   {
     selector: "ImportSpecifier[imported.name='NativeTabs']",
     message: 'No NativeTabs (D35): hidden native tabs cannot be navigated to.',
+  },
+  {
+    // Paper 5.15.3 HelperText and TextInput default maxFontSizeMultiplier to 1.5, an unrecorded
+    // sub-2.0 cap (CLAUDE.md → Text scaling). Matches the plain JSX names only, so a spread of
+    // props still needs the explicit attribute.
+    selector:
+      "JSXOpeningElement[name.name=/^(HelperText|TextInput)$/]:not(:has(JSXAttribute[name.name='maxFontSizeMultiplier']))",
+    message:
+      'Pass maxFontSizeMultiplier={UNCAPPED_FONT_SCALE} (src/constants/textScaling.ts): Paper caps HelperText/TextInput at 1.5 by default, and undefined keeps that cap. A real cap needs an ADR.',
+  },
+  {
+    // `undefined` falls back to the library default cap (e.g. Paper's 1.5); uncap with 0.
+    selector:
+      "JSXAttribute[name.name=/^(maxFontSizeMultiplier|labelMaxFontSizeMultiplier|titleMaxFontSizeMultiplier)$/] > JSXExpressionContainer > Identifier[name='undefined']",
+    message:
+      'Use UNCAPPED_FONT_SCALE (0, src/constants/textScaling.ts) instead of undefined: undefined keeps the library default cap. A real cap needs an ADR.',
+  },
+  {
+    // Paper 5.15.3 Checkbox.Item defaults labelMaxFontSizeMultiplier to 1.5.
+    selector:
+      "JSXOpeningElement[name.object.name='Checkbox'][name.property.name='Item']:not(:has(JSXAttribute[name.name='labelMaxFontSizeMultiplier']))",
+    message:
+      'Pass labelMaxFontSizeMultiplier={UNCAPPED_FONT_SCALE} (src/constants/textScaling.ts): Paper caps Checkbox.Item labels at 1.5 by default. A real cap needs an ADR.',
+  },
+  {
+    // Paper 5.15.3 Menu.Item defaults titleMaxFontSizeMultiplier to 1.5.
+    selector:
+      "JSXOpeningElement[name.object.name='Menu'][name.property.name='Item']:not(:has(JSXAttribute[name.name='titleMaxFontSizeMultiplier']))",
+    message:
+      'Pass titleMaxFontSizeMultiplier={UNCAPPED_FONT_SCALE} (src/constants/textScaling.ts): Paper caps Menu.Item titles at 1.5 by default. A real cap needs an ADR.',
   },
 ];
 

@@ -23,3 +23,10 @@ export const DEFAULT_DATA_DIRECTORIES = {
 export const IOS_BACKUP_EXCLUDED_DIRECTORIES = ['Documents', 'Library/Application Support'] as const;
 
 export type IosBackupExcludedDirectory = (typeof IOS_BACKUP_EXCLUDED_DIRECTORIES)[number];
+
+/**
+ * Profile photos live in `<document directory>/profile/` (B11): the picker's result is a purgeable
+ * cache file, so the photo is copied here on Save. Inside `Documents` (iOS) / `files` (Android),
+ * so the backup exclusion above already covers it. `profile.photo_uri` stores only the file name.
+ */
+export const PROFILE_PHOTO_DIR = 'profile';

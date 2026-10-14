@@ -2,6 +2,7 @@ import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { Button, HelperText, Snackbar } from 'react-native-paper';
 
 import { ANXIETY_SCALE, MOOD_SCALE, STRESS_SCALE } from '@/constants/scales';
+import { UNCAPPED_FONT_SCALE } from '@/constants/textScaling';
 import { useAppTheme } from '@/themes/useAppTheme';
 import { EmojiPicker } from '@/ui/components/EmojiPicker/EmojiPicker';
 import { NoteFields } from '@/ui/components/NoteFields/NoteFields';
@@ -111,7 +112,7 @@ export function HomeScreen() {
         </View>
         <View style={styles.footer}>
           {saveError ? (
-            <HelperText type="error" visible>
+            <HelperText type="error" visible maxFontSizeMultiplier={UNCAPPED_FONT_SCALE}>
               {saveError}
             </HelperText>
           ) : null}
@@ -120,7 +121,9 @@ export function HomeScreen() {
             onPress={submit}
             disabled={isSaving}
             loading={isSaving}
-            contentStyle={styles.submitContent}>
+            style={styles.submitButton}
+            contentStyle={styles.submitContent}
+            labelStyle={styles.submitLabel}>
             Submit
           </Button>
         </View>

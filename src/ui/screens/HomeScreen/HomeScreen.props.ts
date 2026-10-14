@@ -17,6 +17,9 @@ export const makeStyles = (theme: AppTheme) =>
       backgroundColor: theme.colors.background,
     },
     submitContent: { minHeight: MIN_TOUCH_TARGET },
+    // Paper's Button label is one line: never wider than the footer; the label shrinks instead.
+    submitButton: { maxWidth: '100%' },
+    submitLabel: { flexShrink: 1 },
     // Paper pads the Snackbar by the bottom safe-area inset; here it sits above the footer and tab bar.
     snackbarWrapper: { paddingBottom: 0 },
   });

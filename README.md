@@ -4,7 +4,7 @@ A rewrite of Mood Buddy, a private mood journal for iPhone and Android phones. Y
 stress and anxiety; the data stays on the device in SQLite.
 
 **Status:** foundation only. The app shell (navigation, theme, storage, database schema and
-startup) is built; the screens are placeholders. Feature work follows [docs/SPEC.md](docs/SPEC.md).
+startup), the Home check-in and the offline part of Profile (bio and photo) are built; the other screens are placeholders. Feature work follows [docs/SPEC.md](docs/SPEC.md).
 
 ## Requirements
 
@@ -57,6 +57,10 @@ There are no accounts, no analytics and no backend. Your data stays on the devic
 - **What that means for you:** your entries are lost if you change phones, restore a phone from a
   backup, or delete and reinstall the app. Use **Export my data** (CSV of your entries) to keep a
   copy, and **Delete all my data** to erase everything. Both are planned features (SPEC D14, D30).
+- **Profile photo:** chosen with the phone's own photo picker, so the app asks for no photo or camera
+  permission. The photo is copied into the app's data folder on your device and stays there
+  ([ADR 011](docs/adr/011-profile-photo-storage.md)). The copy keeps whatever metadata the picked file had
+  (for example location); the app does not strip it.
 - **Network:** today the app makes no network calls of its own. Planned (not built yet): an
   optional AI chat that calls the Anthropic API with a key you supply, and a daily quote from
   ZenQuotes. Once those ship, they will be the only network calls.

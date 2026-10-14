@@ -13,7 +13,11 @@ Short records of significant decisions. The full product decisions (D1–D50) li
 | [007](007-dependency-audit-exceptions.md) | Known `yarn audit` exceptions (all under `expo`, no patch available) | Accepted | - |
 | [008](008-repositories-over-structural-db-type.md) | Repositories are factories over a structural `SqlDatabase` type | Accepted | §2.7, §3.7, D3, D20 |
 | [009](009-env-files-policy.md) | Only `.env.example` is committed; `.env` is git-ignored; EAS uses EAS environment variables | Accepted | - |
-| [010](010-font-scale-caps.md) | Font-scale caps on emoji tiles and the screen header (accepted WCAG 1.4.4 exception) | Accepted | D48 |
+| [010](010-font-scale-caps.md) | Font-scale caps on emoji tiles only (accepted WCAG 1.4.4 exception); implicit library caps count as caps. Amended: header cap removed | Accepted | D48 |
+| [011](011-profile-photo-storage.md) | Profile photo: system picker with no permission; copied on Save, file name stored | Accepted | §1.7, D49 |
+| [012](012-leave-guard-registry.md) | Leave-guard registry confirms before leaving a screen with unsaved edits | Accepted | §1.7 |
+| [013](013-live-text-size-relayout.md) | Live system text-size changes use a JS re-layout pass | Accepted | D48 |
+| [014](014-screen-header-not-appbar.md) | ScreenHeader is a plain-view header copying Paper's layout, not `Appbar.Header` (iOS `Surface` stops the bar growing) | Accepted | D48 |
 
 ## Writing a new ADR
 

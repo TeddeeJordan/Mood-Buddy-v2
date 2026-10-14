@@ -148,4 +148,44 @@ describe('useScrollIntoView', () => {
     await unmount();
     expect(field.measureLayout).toHaveBeenCalledTimes(1);
   });
+
+  describe('revealFocusedField', () => {
+    it('is a no-op when no field is focused', async () => {
+      const { result, scrollTo } = await setup(400, 0);
+      expect(() => result.current.revealFocusedField()).not.toThrow();
+      expect(scrollTo).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op before the viewport has been measured', async () => {
+      const { result } = await renderHook(() => useScrollIntoView());
+      (result.current.contentRef as { current: unknown }).current = {};
+      const field = fakeField(600, 40);
+      await act(async () => result.current.revealField(field.node));
+      field.measureLayout.mockClear();
+      result.current.revealFocusedField();
+      expect(field.measureLayout).not.toHaveBeenCalled();
+    });
+
+    it('re-reveals the focused field after it grew (e.g. a multiline input)', async () => {
+      const { result, scrollTo } = await setup(400, 0);
+      const field = fakeField(300, 40);
+      await act(async () => result.current.revealField(field.node));
+      expect(scrollTo).not.toHaveBeenCalled(); // fits
+      field.measureLayout.mockImplementation((_c: unknown, ok: (...a: number[]) => void) => ok(0, 300, 300, 200));
+      result.current.revealFocusedField();
+      expect(scrollTo).toHaveBeenCalledWith({ y: 300 + 200 + SCROLL_REVEAL_MARGIN - 400, animated: true });
+    });
+
+    it('does nothing after the field blurred', async () => {
+      const { result, scrollTo } = await setup(400, 0);
+      const field = fakeField(600, 40);
+      await act(async () => result.current.revealField(field.node));
+      scrollTo.mockClear();
+      await act(async () => result.current.forgetField(field.node));
+      field.measureLayout.mockClear();
+      result.current.revealFocusedField();
+      expect(field.measureLayout).not.toHaveBeenCalled();
+      expect(scrollTo).not.toHaveBeenCalled();
+    });
+  });
 });

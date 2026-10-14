@@ -2,6 +2,7 @@ import { fireEvent, renderHook, screen } from '@testing-library/react-native';
 import { router, usePathname } from 'expo-router';
 import type { DrawerContentComponentProps } from 'expo-router/drawer';
 
+import { createLeaveGuardRegistry, LeaveGuardContext } from '@/hooks/useLeaveGuard';
 import { MIN_TOUCH_TARGET } from '@/constants/touchTarget';
 import { iconButtonContainerStyle } from '@/tests/helpers/touchTarget';
 import { renderWithProviders } from '@/tests/helpers/renderWithProviders';
@@ -91,5 +92,65 @@ describe('AppDrawerContent', () => {
     await fireEvent.press(screen.getByLabelText('Close menu'));
     expect(navigation.closeDrawer).toHaveBeenCalledTimes(1);
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  describe('leave guard', () => {
+    function withGuard(guard: (proceed: () => void) => boolean) {
+      const registry = createLeaveGuardRegistry();
+      registry.register(guard);
+      return function Wrapper({ children }: { children: React.ReactNode }) {
+        return <LeaveGuardContext value={registry}>{children}</LeaveGuardContext>;
+      };
+    }
+
+    it('selecting the current item navigates directly without asking the guard', async () => {
+      jest.mocked(usePathname).mockReturnValue('/profile');
+      const guard = jest.fn(() => true);
+      const Wrapper = withGuard(guard);
+      const { navigation, props } = makeProps();
+      const { result } = await renderHook(() => useAppDrawerContent(props), { wrapper: Wrapper });
+      result.current.onSelect(result.current.items.find((i) => i.label === 'Profile')!);
+      expect(guard).not.toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith('/profile');
+      expect(navigation.closeDrawer).toHaveBeenCalledTimes(1);
+    });
+
+    it('a blocked selection does not navigate until the user proceeds', async () => {
+      jest.mocked(usePathname).mockReturnValue('/profile');
+      let proceed: (() => void) | undefined;
+      const Wrapper = withGuard((p) => {
+        proceed = p;
+        return true;
+      });
+      const { props } = makeProps();
+      const { result } = await renderHook(() => useAppDrawerContent(props), { wrapper: Wrapper });
+      result.current.onSelect(result.current.items.find((i) => i.label === 'Settings')!);
+      expect(router.navigate).not.toHaveBeenCalled();
+      proceed?.();
+      expect(router.navigate).toHaveBeenCalledWith('/settings');
+    });
+
+    it('closes the drawer before asking the guard, so its dialog is not covered', async () => {
+      jest.mocked(usePathname).mockReturnValue('/profile');
+      const { navigation, props } = makeProps();
+      const order: string[] = [];
+      navigation.closeDrawer.mockImplementation(() => order.push('close'));
+      const Wrapper = withGuard(() => {
+        order.push('guard');
+        return true;
+      });
+      const { result } = await renderHook(() => useAppDrawerContent(props), { wrapper: Wrapper });
+      result.current.onSelect(result.current.items.find((i) => i.label === 'Diary')!);
+      expect(order).toEqual(['close', 'guard']);
+    });
+
+    it('navigates straight away when the guard lets the user go', async () => {
+      jest.mocked(usePathname).mockReturnValue('/profile');
+      const Wrapper = withGuard(() => false);
+      const { props } = makeProps();
+      const { result } = await renderHook(() => useAppDrawerContent(props), { wrapper: Wrapper });
+      result.current.onSelect(result.current.items.find((i) => i.label === 'Diary')!);
+      expect(router.navigate).toHaveBeenCalledWith('/diary');
+    });
   });
 });

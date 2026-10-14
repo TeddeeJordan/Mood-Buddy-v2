@@ -11,6 +11,7 @@ The Home check-in is the first feature to write to SQLite. It must insert an ent
 - `createEntriesRepository(db)` and `createPromptsRepository(db)` are factory functions. They take a `SqlDatabase` (`src/types/db.ts`): the subset of `SQLiteDatabase` they use (`runAsync`, `getAllAsync`, `getFirstAsync`, `withTransactionAsync`). Every value is a bound parameter.
 - `useEntriesRepository()` (`src/hooks/useRepositories.ts`) binds the factory to `useSQLiteContext()`. It is the seam screen tests mock.
 - `insertEntryWithPrompt` runs the entry insert, the prompt insert and the 90-day prompt purge in one `withTransactionAsync` transaction, never `withExclusiveTransactionAsync` (its separate connection has foreign keys off).
+- `createProfileRepository(db)` (`getProfile`, `saveProfile` upsert of row 1, `resetProfile`) follows the same pattern. The migration of the profile repository from `SQLiteDatabase` to `SqlDatabase`, which this ADR first deferred, is complete with the Profile feature.
 - Row scores are validated (`isScaleValue`) when mapped, not cast.
 - No schema change; `SCHEMA_VERSION` stays 1.
 

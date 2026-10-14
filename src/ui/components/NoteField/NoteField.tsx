@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 
 import { NOTE_MAX_LENGTH } from '@/constants/limits';
+import { UNCAPPED_FONT_SCALE } from '@/constants/textScaling';
 import { useAppTheme } from '@/themes/useAppTheme';
 
 import { makeStyles, type NoteFieldProps } from './NoteField.props';
@@ -30,6 +31,7 @@ export function NoteField({
         placeholder={name}
         accessibilityLabel={accessibilityLabel}
         maxLength={NOTE_MAX_LENGTH}
+        maxFontSizeMultiplier={UNCAPPED_FONT_SCALE}
         style={styles.input}
       />
       <Text

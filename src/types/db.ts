@@ -45,5 +45,10 @@ export interface DiaryPromptRow {
 export interface ProfileRow {
   id: 1;
   bio: string;
+  /**
+   * Despite the column name, the photo's FILE NAME inside `PROFILE_PHOTO_DIR` under the document
+   * directory, not a URI: the absolute container path changes across iOS app updates. Resolve it
+   * with `resolvePhotoUri` (`src/services/storage/profilePhotoStorage.ts`). Null = no photo.
+   */
   photo_uri: string | null;
 }

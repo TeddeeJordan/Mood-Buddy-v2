@@ -1,13 +1,19 @@
-import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import { act, fireEvent, renderRouter, screen, waitFor, within } from 'expo-router/testing-library';
+import { Dimensions, StyleSheet } from 'react-native';
 
+import { queryClient } from '@/ui/components/AppProviders/useAppProviders';
+import { migrateDbIfNeeded } from '@/services/db/migrations';
 import { storage } from '@/services/storage/mmkv';
+import { NodeSqliteAdapter } from '@/tests/helpers/nodeSqliteAdapter';
 import { secureStoreMock } from '@/tests/helpers/secureStoreMock';
 
 // The real route tree (src/app) with real providers, except SQLite (native) and the splash.
+// `mockDb` is swapped for a real in-memory database by the Profile tests; elsewhere the screens
+// never touch the database.
+let mockDb: unknown = {};
 jest.mock('expo-sqlite', () => ({
   SQLiteProvider: ({ children }: { children: React.ReactNode }) => children,
-  // Home builds its repository from the connection; navigation tests never touch the database.
-  useSQLiteContext: () => ({}),
+  useSQLiteContext: () => mockDb,
 }));
 jest.mock('expo-splash-screen', () => ({
   hide: jest.fn(),
@@ -67,6 +73,7 @@ function visibleTabNames() {
 }
 
 beforeEach(() => {
+  mockDb = {};
   storage.clearAll();
   secureStoreMock().__resetSecureStore();
 });
@@ -148,5 +155,120 @@ describe('navigation shell (D35)', () => {
     const app = await renderApp('/chat');
     await fireEvent.press(screen.getByLabelText('Go back'));
     expect(app.getPathname()).toBe('/');
+  });
+});
+
+describe('Profile route and the unsaved-changes leave guard', () => {
+  let db: NodeSqliteAdapter;
+
+  beforeEach(async () => {
+    db = new NodeSqliteAdapter();
+    await migrateDbIfNeeded(db);
+    await db.runAsync('UPDATE profile SET bio = ? WHERE id = 1', 'Saved bio');
+    mockDb = db;
+    // The app's QueryClient lives at module scope: drop what earlier tests cached (e.g. the profile
+    // query that failed against the empty stand-in database).
+    queryClient.clear();
+  });
+
+  afterEach(() => {
+    queryClient.clear();
+    db.close();
+  });
+
+  async function openProfileEditor(url = '/profile') {
+    const app = await renderApp(url);
+    await waitFor(() => expect(screen.getByLabelText('Edit profile').props.accessibilityState?.disabled).toBeFalsy());
+    return app;
+  }
+
+  async function startEditing() {
+    await fireEvent.press(screen.getByLabelText('Edit profile'));
+    await screen.findByLabelText('Bio');
+  }
+
+  const tab = (name: string) => tabButtons().find((t) => String(t.props.accessibilityLabel).startsWith(`${name},`))!;
+
+  it('renders the real ProfileScreen at /profile with the saved bio', async () => {
+    const app = await openProfileEditor();
+    expect(app.getPathname()).toBe('/profile');
+    expect(await screen.findByText('Saved bio')).toBeTruthy();
+    expect(screen.getByLabelText('Edit profile')).toBeTruthy();
+  });
+
+  it('a dirty draft + a tab press shows the Discard dialog and does not navigate', async () => {
+    const app = await openProfileEditor();
+    await startEditing();
+    await fireEvent.changeText(screen.getByLabelText('Bio'), 'Saved bio, edited');
+    await fireEvent.press(tab('Home'));
+    expect(await screen.findByText('Discard changes?')).toBeTruthy();
+    expect(app.getPathname()).toBe('/profile');
+  });
+
+  it('Keep editing stays on Profile with the draft', async () => {
+    const app = await openProfileEditor();
+    await startEditing();
+    await fireEvent.changeText(screen.getByLabelText('Bio'), 'Saved bio, edited');
+    await fireEvent.press(tab('Dashboard'));
+    await fireEvent.press(await screen.findByRole('button', { name: 'Keep editing' }));
+    await waitFor(() => expect(screen.queryByText('Discard changes?')).toBeNull());
+    expect(app.getPathname()).toBe('/profile');
+    expect(screen.getByLabelText('Bio').props.value).toBe('Saved bio, edited');
+  });
+
+  it('Discard navigates to the pressed tab', async () => {
+    const app = await openProfileEditor();
+    await startEditing();
+    await fireEvent.changeText(screen.getByLabelText('Bio'), 'Saved bio, edited');
+    await fireEvent.press(tab('Dashboard'));
+    await fireEvent.press(await screen.findByRole('button', { name: 'Discard' }));
+    await waitFor(() => expect(app.getPathname()).toBe('/dashboard'));
+  });
+
+  it('an unchanged edit lets the user switch tabs without a dialog', async () => {
+    const app = await openProfileEditor();
+    await startEditing();
+    await fireEvent.press(tab('Home'));
+    await waitFor(() => expect(app.getPathname()).toBe('/'));
+    expect(screen.queryByText('Discard changes?')).toBeNull();
+  });
+
+  it('a dirty draft + a drawer item shows the Discard dialog; Discard then navigates', async () => {
+    const app = await openProfileEditor();
+    await startEditing();
+    await fireEvent.changeText(screen.getByLabelText('Bio'), 'Saved bio, edited');
+    await fireEvent.press(screen.getByLabelText('Open menu'));
+    await fireEvent.press(await screen.findByLabelText('Settings'));
+    expect(await screen.findByText('Discard changes?')).toBeTruthy();
+    expect(app.getPathname()).toBe('/profile');
+    await fireEvent.press(await screen.findByRole('button', { name: 'Discard' }));
+    await waitFor(() => expect(app.getPathname()).toBe('/settings'));
+  });
+
+  it('a drawer item navigates directly when nothing was edited', async () => {
+    const app = await openProfileEditor();
+    await fireEvent.press(screen.getByLabelText('Open menu'));
+    await fireEvent.press(await screen.findByLabelText('Diary'));
+    await waitFor(() => expect(app.getPathname()).toBe('/diary'));
+    expect(screen.queryByText('Discard changes?')).toBeNull();
+  });
+});
+
+describe('live font scale wiring', () => {
+  afterEach(() => {
+    Dimensions.set({ window: { ...Dimensions.get('window'), fontScale: 1 }, screen: { ...Dimensions.get('screen'), fontScale: 1 } });
+  });
+
+  it('the tab labels get the re-layout marker (tabBarLabelStyle) after a text-size change', async () => {
+    await renderApp('/');
+    const label = () => within(tabButtons()[0]).getByText('Home');
+    expect(StyleSheet.flatten(label().props.style).fontStyle).toBeUndefined();
+    await act(async () => {
+      Dimensions.set({
+        window: { ...Dimensions.get('window'), fontScale: 1.6 },
+        screen: { ...Dimensions.get('screen'), fontScale: 1.6 },
+      });
+    });
+    expect(StyleSheet.flatten(label().props.style).fontStyle).toBe('normal');
   });
 });

@@ -1,7 +1,9 @@
-import { fireEvent, screen, userEvent, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, userEvent, waitFor, within } from '@testing-library/react-native';
 import { useNavigation } from 'expo-router';
-import { AccessibilityInfo, ScrollView, View } from 'react-native';
+import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
 
+import { UNCAPPED_FONT_SCALE } from '@/constants/textScaling';
+import { MIN_TOUCH_TARGET } from '@/constants/touchTarget';
 import { useEntriesRepository } from '@/hooks/useRepositories';
 import { renderWithProviders } from '@/tests/helpers/renderWithProviders';
 import { HomeScreen } from '@/ui/screens/HomeScreen/HomeScreen';
@@ -134,9 +136,24 @@ describe('HomeScreen', () => {
     await user.press(row(1, 1));
     await user.press(row(2, 1));
     await user.press(screen.getByRole('button', { name: 'Submit' }));
-    expect(await screen.findByText("Couldn't save your check-in. Try again.")).toBeTruthy();
+    const error = await screen.findByText("Couldn't save your check-in. Try again.");
+    expect(error.props.maxFontSizeMultiplier).toBe(UNCAPPED_FONT_SCALE);
     expect(row(0, 4).props.accessibilityState.checked).toBe(true);
     expect(screen.queryByText(/Saved!/)).toBeNull();
+  });
+
+  it('lets the Submit button shrink instead of overflowing at large text sizes', async () => {
+    await renderHome();
+    const button = screen.getByRole('button', { name: 'Submit' });
+    const styles: Record<string, unknown>[] = [];
+    for (let n: typeof button | null = button; n; n = n.parent) styles.push((StyleSheet.flatten(n.props.style) ?? {}) as Record<string, unknown>);
+    expect(styles.some((s) => s.maxWidth === '100%')).toBe(true);
+    const label = within(button).getByText('Submit');
+    expect(StyleSheet.flatten(label.props.style)).toMatchObject({ flexShrink: 1 });
+    // The content (an ancestor of the label) keeps the 48dp target and grows with the text.
+    const labelAncestors: Record<string, unknown>[] = [];
+    for (let n: typeof label | null = label; n; n = n.parent) labelAncestors.push((StyleSheet.flatten(n.props.style) ?? {}) as Record<string, unknown>);
+    expect(labelAncestors.some((s) => s.minHeight === MIN_TOUCH_TARGET)).toBe(true);
   });
 
   // Regression guard for the Android keyboard (edge-to-edge does not resize the window). It is
